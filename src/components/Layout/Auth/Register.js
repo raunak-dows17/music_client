@@ -1,134 +1,90 @@
-"use client";
+"use client"
 
-import { Images } from "@/components/Assets/ProfilePictures";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { Images } from '@/components/Assets/ProfilePictures';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation'
+import React, { useState } from 'react'
 
 const Register = () => {
-  const [picture, setPicture] = useState(0);
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const router = useRouter();
+  const [profile, setProfile] = useState(0);
+  const [formData, setFormData] = useState({
+    profilePic: profile,
+    username: "",
+    email: "",
+    password: "",
+  })
 
-  const handleImageSelection = (index) => {
-    setPicture(index);
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({...formData, [name]: value})
+  }
 
   const handleSubmit = async (e) => {
-      e.preventDefault();
-      const data = {
-        profilePic: picture,
-        username: username,
-        email: email,
-        password: password,
-      };
-    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URI}/users/register`, {
-      method: "POST",
-      body: JSON.stringify(data),
-    })
-      .then((res) => {
+    e.preventDefault();
+
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URI}/users/register`, {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: {
+          "content-type": "application/json",
+        },
+      }).then((res) => {
         if (res.ok) {
+          res.json().then((data) => localStorage.setItem("music-token", data?.token));
           router.push("/");
         }
-      })
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((err) => {
-        console.error({
-          message: err.message,
-        });
-      });
-    console.log(JSON.stringify(data));
-  };
+      }).catch((err) => console.error(err.message));
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
 
   return (
-    <main className="h-screen overflow-hidden w-10/12 mx-auto">
-      <div className="flex justify-between gap-6 items-center w-full h-full">
-        <form
-          action=""
-          onSubmit={handleSubmit}
-          className="flex flex-col justify-center items-center max-w-7xl w-3/4 md:bg-black/30 bg-white/50 p-5 rounded-lg text-black/80 gap-2"
-        >
-          <h1 className="text-center text-3xl">Welcome to TrackEase</h1>
-          <p className="teaxt-center teaxt-sm">
-            Access all kinds of songs for free!!!
-          </p>
-          <label
-            htmlFor="avatar"
-            className="flex items-center flex-col gap-4 group cursor-pointer relative"
-          >
-            <div className="flex justify-between items-center gap-10">
-              <img
-                src={Images[picture]}
-                alt={Images[picture]}
-                className="w-24"
-              />
-              <p>Choose a musical avatar</p>
+    <main>
+      <div className="w-10/12 mx-auto flex justify-center gap-20 items-center h-screen overflow-hidden">
+        <div className="flex flex-1 justify-center items-center flex-col gap-3 p-5 bg-black/50 rounded-2xl w-full">
+          <h1 className="lg:text-4xl text-2xl text-center font-semibold">
+            Welome to TrackEase
+          </h1>
+          <p className='text-white/50 text-lg'>Start your musical Journey from here!</p>
+          <div className='relative flex lg:w-1/2 w-full group justify-between gap-3 flex-wrap-reverse items-center'>
+            <div className='flex justify-center w-20 items-center cursor-pointer overflow-hidden aspect-square rounded-full'>
+              <img src={Images[profile]} alt="avatar" className='w-full h-full object-cover' />
             </div>
-            <div className="group-hover:flex hidden ic gap-3 absolute top-24 bg-black/40 p-2 rounded-2xl">
-              {Images &&
-                Images.slice(1, 6).map((image, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleImageSelection(index + 1)}
-                    className="sm:w-20 w-10 aspect-square cursor-pointer rounded-full flex justify-center items-center overflow-hidden"
-                  >
-                    <img src={image} alt="index" />
+            <div className='absolute hidden gap-2 justify-center top-full bg-black p-3 rounded-2xl group-hover:flex'>
+              {
+                Images && Images.slice(1,6).map((image, index) => (
+                  <div key={index} className='flex justify-center cursor-pointer w-16 items-center overflow-hidden aspect-square rounded-full shrink-0 transition-all ease-in-out duration-300 hover:-translate-y-2 shadow-lg' onClick={() => { setProfile(index + 1); setFormData({...formData, profilePic: index+1})}}>
+                    <img src={image} alt={`avatar ${index}`} className='shrink-0 w-full h-full object-cover' />
                   </div>
-                ))}
+                ))
+              }
             </div>
-          </label>
-          <label htmlFor="username" className="w-3/4">
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              autoComplete="username"
-              placeholder="user name"
-              className="px-5 py-2 rounded-lg w-full focus:outline-4 focus:outline-none focus:outline-blue-500"
-            />
-          </label>
-          <label htmlFor="email" className="w-3/4">
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="user@gmail.com"
-              className="px-5 py-2 rounded-lg w-full focus:outline-4 focus:outline-none focus:outline-blue-500"
-            />
-          </label>
-          <label htmlFor="password" className="w-3/4">
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="*******"
-              className="px-5 py-2 rounded-lg w-full focus:outline-4 focus:outline-none focus:outline-blue-500"
-            />
-          </label>
-          <button className="w-3/4 bg-blue-500 focus:outline-4 focus:outline-blue-600 flex justify-center items-center rounded-lg p-2 text-white">
-            Join Us
-          </button>
-        </form>
-        <div className="absolute md:static w-full h-full inset-0 flex justify-center items-center overflow-hidden -z-10">
+            <p className='text-lg text-white/50'>Choose a musical avatar</p>
+          </div>
+          <form action="submit" onSubmit={handleSubmit} className='flex flex-col lg:w-1/2 w-full gap-4 items-center justify-center'>
+            <label htmlFor="username"></label>
+            <input type="text" id='username' required name='username' value={formData.username} onChange={(e) => handleChange(e)} placeholder='username' className='bg-white/10 rounded-xl p-3 text-lg w-full focus:outline-none focus:outline-blue-300 foucs:outline-8' />
+            <label htmlFor="email"></label>
+            <input type="email" id='email' required name='email' placeholder='email' value={formData.email} onChange={(e) => handleChange(e)} className='bg-white/10 rounded-xl p-3 text-lg w-full focus:outline-none focus:outline-blue-300 foucs:outline-8' />
+            <label htmlFor="password"></label>
+            <input type="password" id='password' required name='password' placeholder='password' value={formData.password} onChange={(e) => handleChange(e)} className='bg-white/10 rounded-xl p-3 text-lg w-full focus:outline-none focus:outline-blue-300 foucs:outline-8' />
+            <button type="submit" className='text-center p-3 w-full bg-blue-600 text-white hover:bg-blue-500 transition-all duration-300 ease-in-out rounded-xl'>Join Us</button>
+          </form>
+          <p className='text-center text-lg text-white/50'>Already have an account? <Link href={"/auth/signin"} className='text-blue-400 transition-all ease-in-out duration-300 hover:shadow-sm hover:underline underline-offset-2'>Login Here</Link></p>
+        </div>
+        <div className="flex xl:static absolute inset-0 -z-10 xl:z-0 flex-1 justify-center items-center overflow-hidden w-full h-full rounded-3xl">
           <img
-            src="https://images.unsplash.com/photo-1543599538-a6c4f6cc5c05?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            alt=""
+            src="https://images.unsplash.com/photo-1508615039623-a25605d2b022?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            alt="Lofin To TrackEase"
             className="w-full h-full object-cover"
           />
         </div>
       </div>
     </main>
   );
-};
+}
 
-export default Register;
+export default Register

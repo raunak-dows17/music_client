@@ -13,9 +13,9 @@ const Footer = () => {
         pathname.startsWith("/auth/signin") || pathname.startsWith("/auth/signup")
           ? "hidden"
           : "flex"
-      }`}
+      } fixed inset-x-0 bottom-0 text-white`}
     >
-      Footer
+      Mini player
     </div>
   );
 };

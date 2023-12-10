@@ -1,10 +1,10 @@
-import Login from '@/components/Layout/Auth/Login'
+import ListSongs from '@/components/Admin/ListSongs'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-      <Login />
+      <ListSongs />
     </div>
   )
 }
